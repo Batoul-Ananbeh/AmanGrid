@@ -1,0 +1,39 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node.js
+node_modules/
+dist/
+build/
+
+# Temporary uploads and extracted files
+uploads/
+temp/
+tmp/
+
+# Logs
+*.log
+
+# VS Code and JetBrains
+.vscode/
+.idea/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Sensitive files
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
