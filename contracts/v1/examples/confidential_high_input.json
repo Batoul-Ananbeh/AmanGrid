@@ -1,0 +1,22 @@
+{
+  "contract_version": "1.0",
+  "document_id": "doc-confidential-001",
+  "input_kind": "word",
+  "text": "Synthetic customer-support sample: account holder [PERSON-MASKED] is linked to meter [METER-****-2041]. Billing adjustment notes are incomplete.",
+  "file_metadata": {
+    "file_name": "synthetic_meter_support_sample.docx",
+    "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  },
+  "security_context": {
+    "storage_location": "unapproved_repository",
+    "encryption_status": "unknown",
+    "sharing_scope": "department_wide"
+  },
+  "extraction": {
+    "status": "partial",
+    "important_failure": true,
+    "issues": [
+      "A synthetic embedded table could not be read; the available body text remains usable."
+    ]
+  }
+}

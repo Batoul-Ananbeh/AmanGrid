@@ -1,0 +1,10 @@
+{
+  "contract_version": "1.0",
+  "document_id": "doc-public-001",
+  "input_kind": "manual_text",
+  "text": "Synthetic public notice: the community energy-awareness event opens at 10:00 and the published agenda is available to everyone.",
+  "extraction": {
+    "status": "complete",
+    "important_failure": false
+  }
+}

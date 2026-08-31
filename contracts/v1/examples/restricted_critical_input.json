@@ -1,0 +1,22 @@
+{
+  "contract_version": "1.0",
+  "document_id": "doc-restricted-001",
+  "input_kind": "pdf",
+  "text": "Synthetic OT maintenance sample: PLC [PLC-MASKED-07] connects to host 10.***.***.24. Access token [TOKEN-****-MASKED] is not a usable credential.",
+  "file_metadata": {
+    "file_name": "synthetic_ot_maintenance_sample.pdf",
+    "mime_type": "application/pdf",
+    "file_size_bytes": 4096,
+    "page_count": 2
+  },
+  "security_context": {
+    "storage_location": "personal_cloud",
+    "encryption_status": "not_encrypted",
+    "sharing_scope": "external",
+    "users_with_access": 12
+  },
+  "extraction": {
+    "status": "complete",
+    "important_failure": false
+  }
+}
