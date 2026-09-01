@@ -1,0 +1,123 @@
+{
+  "contract_version": "1.0",
+  "analysis_id": "analysis-restricted-001",
+  "document_id": "doc-restricted-001",
+  "classification": {
+    "level": "Restricted",
+    "confidence": 96,
+    "explanation": "The synthetic sample combines masked OT configuration, internal network information, and a masked credential-like token."
+  },
+  "sensitive_findings": [
+    {
+      "type": "SCADA_OT",
+      "count": 1
+    },
+    {
+      "type": "INTERNAL_IP",
+      "count": 1
+    },
+    {
+      "type": "CREDENTIAL",
+      "count": 1
+    }
+  ],
+  "energy_context": {
+    "scada_ot_relevant": true,
+    "summary": "Synthetic PLC maintenance and OT network context."
+  },
+  "evidence": [
+    {
+      "type": "SCADA_OT",
+      "excerpt": "PLC [PLC-MASKED-07] connects to host 10.***.***.24.",
+      "masked": true
+    },
+    {
+      "type": "CREDENTIAL",
+      "excerpt": "Access token [TOKEN-****-MASKED].",
+      "masked": true
+    }
+  ],
+  "risk": {
+    "base_score": 88,
+    "final_score": 92,
+    "level": "Critical",
+    "factors": [
+      {
+        "factor_id": "data_sensitivity",
+        "label": "Data Sensitivity",
+        "severity": "critical",
+        "explanation": "The sample contains restricted OT and credential-like information."
+      },
+      {
+        "factor_id": "operational_impact",
+        "label": "Operational Impact",
+        "severity": "critical",
+        "explanation": "PLC and OT network details could affect critical operations if exposed."
+      },
+      {
+        "factor_id": "exposure_level",
+        "label": "Exposure Level",
+        "severity": "critical",
+        "explanation": "The supplied context reports external sharing from personal cloud storage."
+      },
+      {
+        "factor_id": "access_scope",
+        "label": "Access Scope",
+        "severity": "high",
+        "explanation": "The stated access extends beyond a restricted OT security group."
+      },
+      {
+        "factor_id": "storage_compliance",
+        "label": "Storage Compliance",
+        "severity": "critical",
+        "explanation": "Personal cloud storage is not an approved repository for restricted OT data."
+      },
+      {
+        "factor_id": "protection_gap",
+        "label": "Protection Gap",
+        "severity": "critical",
+        "explanation": "The supplied context reports that the document is not encrypted."
+      }
+    ],
+    "triggered_overrides": ["DRAFT-SCADA-CREDENTIAL", "DRAFT-RESTRICTED-EXTERNAL"]
+  },
+  "policy": {
+    "recommendations": [
+      {
+        "action": "QUARANTINE",
+        "execution_mode": "SIMULATED",
+        "is_primary": true,
+        "reason": "Critical restricted OT data is in an unapproved external-sharing context."
+      },
+      {
+        "action": "ENCRYPT",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "The supplied context reports that the document is not encrypted."
+      },
+      {
+        "action": "RESTRICT_ACCESS",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "Access must be restricted to the authorized OT security group."
+      },
+      {
+        "action": "ALERT",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "The critical synthetic finding requires security-team visibility."
+      },
+      {
+        "action": "HUMAN_REVIEW",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "Critical restricted OT context requires an authorized human decision."
+      }
+    ],
+    "human_review_required": true,
+    "review_reasons": [
+      "Critical restricted OT context requires an authorized human decision."
+    ],
+    "triggered_rule_ids": ["ENERGY-OT-04"]
+  }
+}

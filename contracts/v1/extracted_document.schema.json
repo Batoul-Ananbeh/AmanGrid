@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amangrid.local/contracts/v1/extracted_document.schema.json",
+  "title": "ExtractedDocument",
+  "description": "DRAFT input contract from secure extraction to the AmanGrid intelligence stack.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "document_id",
+    "input_kind",
+    "extraction"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "1.0"
+    },
+    "document_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "input_kind": {
+      "enum": ["pdf", "word", "manual_text"]
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200000,
+      "pattern": "\\S"
+    },
+    "file_metadata": {
+      "$ref": "#/$defs/fileMetadata"
+    },
+    "security_context": {
+      "$ref": "#/$defs/securityContext"
+    },
+    "extraction": {
+      "$ref": "#/$defs/extraction"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "input_kind": {"const": "manual_text"}
+        },
+        "required": ["input_kind"]
+      },
+      "then": {
+        "not": {"required": ["file_metadata"]}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "input_kind": {"const": "pdf"}
+        },
+        "required": ["input_kind"]
+      },
+      "then": {
+        "required": ["file_metadata"],
+        "properties": {
+          "file_metadata": {
+            "required": ["file_name", "mime_type", "file_size_bytes"],
+            "properties": {
+              "mime_type": {"const": "application/pdf"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "input_kind": {"const": "word"}
+        },
+        "required": ["input_kind"]
+      },
+      "then": {
+        "required": ["file_metadata"],
+        "properties": {
+          "file_metadata": {
+            "required": ["file_name", "mime_type", "file_size_bytes"],
+            "properties": {
+              "mime_type": {
+                "enum": [
+                  "application/msword",
+                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "extraction": {
+            "properties": {
+              "status": {"enum": ["complete", "partial"]}
+            },
+            "required": ["status"]
+          }
+        },
+        "required": ["extraction"]
+      },
+      "then": {
+        "required": ["text"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "extraction": {
+            "properties": {
+              "status": {"const": "complete"}
+            },
+            "required": ["status"]
+          }
+        },
+        "required": ["extraction"]
+      },
+      "then": {
+        "properties": {
+          "extraction": {
+            "properties": {
+              "important_failure": {"const": false}
+            },
+            "not": {
+              "anyOf": [
+                {"required": ["issues"]},
+                {"required": ["failure_reason"]}
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "extraction": {
+            "properties": {
+              "status": {"const": "partial"}
+            },
+            "required": ["status"]
+          }
+        },
+        "required": ["extraction"]
+      },
+      "then": {
+        "properties": {
+          "extraction": {
+            "required": ["issues"],
+            "not": {"required": ["failure_reason"]}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "extraction": {
+            "properties": {
+              "status": {"const": "failed"}
+            },
+            "required": ["status"]
+          }
+        },
+        "required": ["extraction"]
+      },
+      "then": {
+        "not": {"required": ["text"]},
+        "properties": {
+          "extraction": {
+            "required": ["failure_reason"],
+            "properties": {
+              "important_failure": {"const": true}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "fileMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "file_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "mime_type": {
+          "enum": [
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          ]
+        },
+        "file_size_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20971520
+        },
+        "page_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "last_modified_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "securityContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "storage_location": {
+          "enum": [
+            "approved_repository",
+            "unapproved_repository",
+            "personal_cloud",
+            "local_device",
+            "unknown"
+          ]
+        },
+        "encryption_status": {
+          "enum": ["encrypted", "not_encrypted", "unknown"]
+        },
+        "sharing_scope": {
+          "enum": [
+            "private",
+            "restricted_group",
+            "department_wide",
+            "organization_wide",
+            "external",
+            "unknown"
+          ]
+        },
+        "users_with_access": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "extraction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "important_failure"],
+      "properties": {
+        "status": {
+          "enum": ["complete", "partial", "failed"]
+        },
+        "important_failure": {
+          "type": "boolean"
+        },
+        "issues": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        },
+        "failure_reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      }
+    }
+  }
+}

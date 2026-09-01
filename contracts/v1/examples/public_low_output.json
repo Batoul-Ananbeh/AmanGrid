@@ -1,0 +1,85 @@
+{
+  "contract_version": "1.0",
+  "analysis_id": "analysis-public-001",
+  "document_id": "doc-public-001",
+  "classification": {
+    "level": "Public",
+    "confidence": 98,
+    "explanation": "The synthetic text is an approved-style public event notice and contains no sensitive operational details."
+  },
+  "sensitive_findings": [],
+  "energy_context": {
+    "scada_ot_relevant": false,
+    "summary": "General public energy-awareness content with no operational context."
+  },
+  "evidence": [
+    {
+      "type": "PUBLIC_NOTICE",
+      "excerpt": "Synthetic public notice: community energy-awareness event; details [MASKED-NOT-SENSITIVE].",
+      "masked": true
+    }
+  ],
+  "risk": {
+    "base_score": 8,
+    "final_score": 8,
+    "level": "Low",
+    "factors": [
+      {
+        "factor_id": "data_sensitivity",
+        "label": "Data Sensitivity",
+        "severity": "low",
+        "explanation": "Content is intended for public distribution."
+      },
+      {
+        "factor_id": "operational_impact",
+        "label": "Operational Impact",
+        "severity": "none",
+        "explanation": "No operational procedures or control-system details are present."
+      },
+      {
+        "factor_id": "exposure_level",
+        "label": "Exposure Level",
+        "severity": "low",
+        "explanation": "Public exposure matches the stated purpose of the content."
+      },
+      {
+        "factor_id": "access_scope",
+        "label": "Access Scope",
+        "severity": "low",
+        "explanation": "Broad access is appropriate for a public notice."
+      },
+      {
+        "factor_id": "storage_compliance",
+        "label": "Storage Compliance",
+        "severity": "unknown",
+        "explanation": "No storage context was supplied for the manual text."
+      },
+      {
+        "factor_id": "protection_gap",
+        "label": "Protection Gap",
+        "severity": "none",
+        "explanation": "No additional protection requirement is indicated by this synthetic content."
+      }
+    ],
+    "triggered_overrides": []
+  },
+  "policy": {
+    "recommendations": [
+      {
+        "action": "ALLOW",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": true,
+        "reason": "The synthetic public notice is suitable for public distribution."
+      },
+      {
+        "action": "LOG",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "Record the advisory decision for audit visibility."
+      }
+    ],
+    "human_review_required": false,
+    "review_reasons": [],
+    "triggered_rule_ids": ["PUBLIC-01"]
+  }
+}

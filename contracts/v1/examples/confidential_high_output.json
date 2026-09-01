@@ -1,0 +1,108 @@
+{
+  "contract_version": "1.0",
+  "analysis_id": "analysis-confidential-001",
+  "document_id": "doc-confidential-001",
+  "classification": {
+    "level": "Confidential",
+    "confidence": 84,
+    "explanation": "The usable synthetic text links a masked person to a masked meter identifier and billing context."
+  },
+  "sensitive_findings": [
+    {
+      "type": "PERSONAL_DATA",
+      "count": 1
+    },
+    {
+      "type": "METER_IDENTIFIER",
+      "count": 1
+    }
+  ],
+  "energy_context": {
+    "scada_ot_relevant": false,
+    "summary": "Customer metering and billing context without SCADA or OT control details."
+  },
+  "evidence": [
+    {
+      "type": "PERSONAL_DATA",
+      "excerpt": "Account holder [PERSON-MASKED] linked to meter [METER-****-2041].",
+      "masked": true
+    }
+  ],
+  "risk": {
+    "base_score": 66,
+    "final_score": 66,
+    "level": "High",
+    "factors": [
+      {
+        "factor_id": "data_sensitivity",
+        "label": "Data Sensitivity",
+        "severity": "high",
+        "explanation": "The text combines synthetic personal and metering data."
+      },
+      {
+        "factor_id": "operational_impact",
+        "label": "Operational Impact",
+        "severity": "low",
+        "explanation": "No critical control-system operation is described."
+      },
+      {
+        "factor_id": "exposure_level",
+        "label": "Exposure Level",
+        "severity": "high",
+        "explanation": "The supplied context places the document in an unapproved repository."
+      },
+      {
+        "factor_id": "access_scope",
+        "label": "Access Scope",
+        "severity": "medium",
+        "explanation": "Department-wide sharing is broader than necessary for customer support data."
+      },
+      {
+        "factor_id": "storage_compliance",
+        "label": "Storage Compliance",
+        "severity": "high",
+        "explanation": "The stated repository is not approved."
+      },
+      {
+        "factor_id": "protection_gap",
+        "label": "Protection Gap",
+        "severity": "unknown",
+        "explanation": "Encryption status is explicitly unknown."
+      }
+    ],
+    "triggered_overrides": []
+  },
+  "policy": {
+    "recommendations": [
+      {
+        "action": "RESTRICT_ACCESS",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": true,
+        "reason": "Customer-linked meter data requires authorized access only."
+      },
+      {
+        "action": "ENCRYPT",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "The storage context needs an additional protection control."
+      },
+      {
+        "action": "ALERT",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "The partial extraction requires security-team visibility."
+      },
+      {
+        "action": "HUMAN_REVIEW",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "An important synthetic table could not be extracted."
+      }
+    ],
+    "human_review_required": true,
+    "review_reasons": [
+      "Important partial extraction requires review of the unread synthetic table."
+    ],
+    "triggered_rule_ids": ["PRIVACY-02"]
+  }
+}
