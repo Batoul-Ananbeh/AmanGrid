@@ -9,31 +9,25 @@ DATE: 2026-09-01
 PROJECT: AmanGrid
 LOCAL PATH: D:\Projects\AmanGrid
 REMOTE: Batoul-Ananbeh/AmanGrid
-CURRENT TASK: AG-M-001 S03 - Final Review Fixes
-CURRENT BRANCH: feature/ag-m-001-analysis-contracts
-LAST PUSHED HEAD (S02): 92fd9e8 - feat(contracts): address application review feedback
-MODE: IMPLEMENT / CONTRACT REVIEW FIXES
+CURRENT TASK: AG-M-002 - Sensitive Data Detection
+CURRENT BRANCH: feature/ag-m-002-sensitive-data-detection
+BASE HEAD: 6a9e0f7 - Merge pull request #2 from Batoul-Ananbeh/feature/ag-m-001-analysis-contracts
+MODE: IMPLEMENT
 ```
 
 ## Repository State
 
-The project baseline is merged into `main` at `5ba2e97`. The current Intelligence Stack branch adds:
+The project baseline and AG-M-001 contracts are merged into `main` at `6a9e0f7`. The merged Intelligence Stack work provides:
 
 - `.gitignore`
 - a minimal `README.md`
 - `docs/.gitkeep`
 
-The current baseline branch prepares:
-
-- an expanded `README.md`;
-- `AI_DEV_ENVIRONMENT_PROJECT_STARTER.md`;
-- `AMANGRID_MASTER_CONTEXT_AND_TEAM_WORKFLOW_AR.md`;
-- `AGENTS.md`;
 - draft v1 `ExtractedDocument` and `AnalysisDecision` schemas;
 - Public/Low, Confidential/High, and Restricted/Critical synthetic fixture pairs;
 - contract/schema/negative/cross-contract tests.
 
-No application implementation exists yet. There is no verified frontend, backend, database, AI engine, migration, Docker configuration, or CI pipeline. Contract tests are available on the AG-M-001 branch only.
+No Application Stack implementation exists yet. There is no verified frontend, backend, database, migration, Docker configuration, or CI pipeline. Contract tests are available on `main`.
 
 ## Approved Product Boundary
 
@@ -67,17 +61,12 @@ JSON Contracts connect both tracks. Integration and End-to-End testing are share
 ### Mo'men
 
 ```text
-TASK: AG-M-001 - Analysis Contracts and Test Fixtures
-BRANCH: feature/ag-m-001-analysis-contracts
+TASK: AG-M-002 - Sensitive Data Detection
+BRANCH: feature/ag-m-002-sensitive-data-detection
 REVIEWER: Batoul
 ```
 
-Completed Draft outputs:
-
-- `ExtractedDocument` JSON Schema.
-- `AnalysisDecision` JSON Schema.
-- Public/Low, Confidential/High, and Restricted/Critical fixture pairs.
-- Contract validation tests.
+In progress: deterministic, synthetic-only sensitive-data and energy/SCADA/OT detection with masked evidence.
 
 ### Batoul
 
@@ -87,7 +76,7 @@ BRANCH: feature/ag-b-001-application-skeleton
 REVIEWER: Mo'men
 ```
 
-S01 planning outputs:
+S01 planning outputs; S02 has not yet been verified in this repository:
 
 - frontend/backend project skeleton;
 - local run configuration;
@@ -95,30 +84,29 @@ S01 planning outputs:
 - mock result matching the draft contract;
 - initial test commands.
 
-## AG-M-001 S03 Final Review Fixes
+## AG-M-001 Completion State
 
-The S02 changes addressed the main Application Stack concerns. PR [#2](https://github.com/Batoul-Ananbeh/AmanGrid/pull/2) (`feat(contracts): draft v1 analysis contracts and fixtures`) is currently open as a Draft; it must not be merged or frozen yet.
+PR [#2](https://github.com/Batoul-Ananbeh/AmanGrid/pull/2) (`feat(contracts): draft v1 analysis contracts and fixtures`) was merged into `main` at `6a9e0f7` after Application Stack review. The merged v1 contracts are the integration baseline for the next implementation tasks.
 
-Before final approval, Batoul requested these bounded S03 changes:
+Completed S03 changes:
 
-1. Update the PR description with the exact S02 validation command and `60 passed` result.
-2. Update this handoff with the current path, HEAD, Draft PR state, validation result, and review state.
-3. Add semantic validation and a negative test that reject duplicate `policy.recommendations[].action` values.
+1. The PR description records the exact S02 validation command and `60 passed` result.
+2. The handoff recorded the then-current S02 review state and validation result.
+3. Semantic validation and a negative test reject duplicate `policy.recommendations[].action` values.
 
-Do not merge or declare Contract Freeze until Batoul completes the final review and explicitly approves the draft.
+No contract change is in scope for AG-M-002.
 
 ## Immediate Next Steps
 
-1. Commit and push the AG-M-001 S03 duplicate-action semantic validation fix.
-2. Update PR #2 description with the exact S02 validation evidence: `python -m pytest tests/contracts -q` -> `60 passed`.
-3. Request Batoul's final review; keep PR #2 as a Draft and do not freeze or merge.
-4. Keep AG-B-001 at S01 until Batoul approves the updated draft.
+1. Complete, validate, and review AG-M-002 on its own task branch.
+2. Batoul may begin AG-B-001 S02 from `main` using the merged contract fixtures.
+3. Integrate the detector with the Application API only at a shared integration checkpoint.
 
 ## Open Decisions
 
 - Confirm whether the 31 August 2026 competition deadline is still binding.
-- Obtain Batoul's second Application Stack review before Contract Freeze.
-- Confirm the application stack before `AG-B-001` implementation.
+- Confirm the Application Stack implementation details once AG-B-001 S02 is available.
+- Define the future integration interface between the detector and the Application API without changing contract v1 unnecessarily.
 - Replace any UI wording that implies real DLP execution.
 
 ## Last Known Validation
@@ -126,6 +114,7 @@ Do not merge or declare Contract Freeze until Batoul completes the final review 
 ```text
 S02 CONTRACT VALIDATION: `python -m pytest tests/contracts -q` -> `60 passed in 0.25s`.
 S03 CONTRACT VALIDATION: `python -m pytest tests/contracts -q` -> `61 passed in 0.14s`.
+AG-M-002 VALIDATION: `python -m pytest -q` -> `73 passed in 0.24s`.
 APPLICATION TESTS: Not available; application implementation has not started.
 ```
 
