@@ -10,6 +10,7 @@ from .models import DetectionFinding, DetectionResult, FindingType
 
 
 MAX_EVIDENCE_PER_FINDING = 5
+MAX_INPUT_CHARACTERS = 200_000
 
 EMAIL_PATTERN = re.compile(
     r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE
@@ -20,21 +21,24 @@ CREDENTIAL_PATTERN = re.compile(
     r"\s*[:=]\s*(?P<value>[^\s,;]+)",
     re.IGNORECASE,
 )
-METER_ID_PATTERN = re.compile(
-    r"\b(?:smart\s+)?meter\s*(?:id|number|no\.?)?\s*[:#=-]?\s*"
-    r"[A-Z0-9][A-Z0-9-]{5,}\b",
+METER_LABEL_PATTERN = re.compile(
+    r"\b(?:smart\s+)?meter\s+(?:id|number|no\.?)\s*[:#=-]?\s*"
+    r"(?P<value>[A-Z0-9][A-Z0-9-]{5,})\b",
     re.IGNORECASE,
 )
-CUSTOMER_ID_PATTERN = re.compile(
-    r"\b(?:customer|account)\s*(?:id|number|no\.?)?\s*[:#=-]?\s*"
-    r"[A-Z0-9][A-Z0-9-]{5,}\b",
+CUSTOMER_LABEL_PATTERN = re.compile(
+    r"\b(?:customer|account)\s+(?:id|number|no\.?)\s*[:#=-]?\s*"
+    r"(?P<value>[A-Z0-9][A-Z0-9-]{5,})\b",
     re.IGNORECASE,
 )
-EQUIPMENT_ID_PATTERN = re.compile(
-    r"\b(?:equipment|asset)\s*(?:id|number|no\.?)?\s*[:#=-]?\s*"
-    r"[A-Z0-9][A-Z0-9-]{4,}\b",
+EQUIPMENT_LABEL_PATTERN = re.compile(
+    r"\b(?:equipment|asset)\s+(?:id|number|no\.?)\s*[:#=-]?\s*"
+    r"(?P<value>[A-Z0-9][A-Z0-9-]{4,})\b",
     re.IGNORECASE,
 )
+METER_PREFIX_PATTERN = re.compile(r"\b(?P<value>MTR-[A-Z0-9-]{4,})\b", re.IGNORECASE)
+CUSTOMER_PREFIX_PATTERN = re.compile(r"\b(?P<value>CUST-[A-Z0-9-]{4,})\b", re.IGNORECASE)
+EQUIPMENT_PREFIX_PATTERN = re.compile(r"\b(?P<value>EQ-[A-Z0-9-]{3,})\b", re.IGNORECASE)
 ENERGY_INDICATOR_PATTERN = re.compile(
     r"\bSCADA\b|\bOT\b|\bPLC\b|\bRTU\b|\bHMI\b|\bDCS\b|"
     r"\bsubstation\b|\bsmart\s+meter\b|\bfeeder\b",
@@ -51,14 +55,28 @@ def detect_sensitive_data(text: str) -> DetectionResult:
 
     if not isinstance(text, str):
         raise TypeError("text must be a string")
+    if len(text) > MAX_INPUT_CHARACTERS:
+        raise ValueError("text exceeds the 200000-character contract limit")
 
     findings = (
         _detect_emails(text),
         _detect_internal_ips(text),
         _detect_credentials(text),
-        _detect_labeled_identifiers(text, METER_ID_PATTERN, FindingType.METER_ID),
-        _detect_labeled_identifiers(text, CUSTOMER_ID_PATTERN, FindingType.CUSTOMER_ID),
-        _detect_labeled_identifiers(text, EQUIPMENT_ID_PATTERN, FindingType.EQUIPMENT_ID),
+        _detect_identifiers(
+            text, METER_LABEL_PATTERN, METER_PREFIX_PATTERN, FindingType.METER_ID
+        ),
+        _detect_identifiers(
+            text,
+            CUSTOMER_LABEL_PATTERN,
+            CUSTOMER_PREFIX_PATTERN,
+            FindingType.CUSTOMER_ID,
+        ),
+        _detect_identifiers(
+            text,
+            EQUIPMENT_LABEL_PATTERN,
+            EQUIPMENT_PREFIX_PATTERN,
+            FindingType.EQUIPMENT_ID,
+        ),
         _detect_energy_indicators(text),
     )
     return DetectionResult(findings=tuple(finding for finding in findings if finding))
@@ -88,10 +106,20 @@ def _detect_credentials(text: str) -> DetectionFinding | None:
     return DetectionFinding(FindingType.CREDENTIAL, len(matches), evidence)
 
 
-def _detect_labeled_identifiers(
-    text: str, pattern: re.Pattern[str], finding_type: FindingType
+def _detect_identifiers(
+    text: str,
+    label_pattern: re.Pattern[str],
+    prefix_pattern: re.Pattern[str],
+    finding_type: FindingType,
 ) -> DetectionFinding | None:
-    matches = pattern.findall(text)
+    matches: list[str] = []
+    seen_value_spans: set[tuple[int, int]] = set()
+    for match in label_pattern.finditer(text):
+        matches.append(match.group("value"))
+        seen_value_spans.add(match.span("value"))
+    for match in prefix_pattern.finditer(text):
+        if match.span("value") not in seen_value_spans:
+            matches.append(match.group("value"))
     return _finding(finding_type, matches, lambda _: f"{finding_type.value} [REDACTED]")
 
 

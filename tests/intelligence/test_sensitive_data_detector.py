@@ -63,6 +63,55 @@ def test_detects_each_supported_internal_ipv4_range():
     assert internal_ips.evidence == ("IP [REDACTED]",)
 
 
+def test_ordinary_identifier_prose_is_not_detected():
+    text = (
+        "The meter reading is stable, the smart meter is installed, the account holder "
+        "called customer service, and equipment status is normal."
+    )
+
+    findings = findings_by_type(text)
+
+    assert FindingType.METER_ID not in findings
+    assert FindingType.CUSTOMER_ID not in findings
+    assert FindingType.EQUIPMENT_ID not in findings
+
+
+@pytest.mark.parametrize(
+    ("text", "finding_type"),
+    [
+        ("Meter ID: 12345678", FindingType.METER_ID),
+        ("Smart meter number: 87654321", FindingType.METER_ID),
+        ("Customer No: 10020030", FindingType.CUSTOMER_ID),
+        ("Account Number: 20030040", FindingType.CUSTOMER_ID),
+        ("Equipment ID: PLC-CTRL-99", FindingType.EQUIPMENT_ID),
+        ("Asset No: 12345", FindingType.EQUIPMENT_ID),
+    ],
+)
+def test_explicit_identifier_labels_are_detected(text, finding_type):
+    assert findings_by_type(text)[finding_type].count == 1
+
+
+@pytest.mark.parametrize(
+    ("text", "finding_type"),
+    [
+        ("MTR-12345678", FindingType.METER_ID),
+        ("CUST-12345678", FindingType.CUSTOMER_ID),
+        ("EQ-CTRL-99", FindingType.EQUIPMENT_ID),
+    ],
+)
+def test_approved_identifier_prefixes_are_detected_without_labels(text, finding_type):
+    assert findings_by_type(text)[finding_type].count == 1
+
+
+def test_detector_rejects_text_above_the_contract_limit():
+    with pytest.raises(ValueError, match="200000-character contract limit"):
+        detect_sensitive_data("x" * 200001)
+
+
+def test_detector_accepts_text_at_the_contract_limit():
+    assert detect_sensitive_data("x" * 200000).findings == ()
+
+
 def test_contract_findings_only_expose_type_and_count():
     result = detect_sensitive_data("SCADA host 10.1.2.3")
 

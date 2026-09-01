@@ -96,11 +96,24 @@ Completed S03 changes:
 
 No contract change is in scope for AG-M-002.
 
+## AG-M-002 S02 Review Fixes
+
+Batoul reviewed the detector draft and requested bounded changes before approval. The local S02 changes:
+
+1. Require an explicit identifier label (`ID`, `Number`, or `No`) or an approved value prefix (`MTR-`, `CUST-`, or `EQ-`).
+2. Reject ordinary prose such as `meter reading`, `customer service`, and `equipment status` as identifiers.
+3. Add positive coverage for every supported label/prefix form and negative ordinary-prose coverage.
+4. Enforce the merged 200,000-character text limit at the public detector entry point.
+5. Document the future masked-evidence adapter while preserving `contract_findings()` as `{type, count}` only.
+
+PR review remains Draft. Do not merge until Batoul completes the final review.
+
 ## Immediate Next Steps
 
-1. Complete, validate, and review AG-M-002 on its own task branch.
-2. Batoul may begin AG-B-001 S02 from `main` using the merged contract fixtures.
-3. Integrate the detector with the Application API only at a shared integration checkpoint.
+1. Commit and push AG-M-002 S02 review fixes on its existing task branch.
+2. Update the Draft PR with the `85 passed` validation evidence and request Batoul's final review.
+3. Batoul may begin AG-B-001 S02 from `main` using the merged contract fixtures.
+4. Integrate the detector with the Application API only at a shared integration checkpoint.
 
 ## Open Decisions
 
@@ -114,7 +127,8 @@ No contract change is in scope for AG-M-002.
 ```text
 S02 CONTRACT VALIDATION: `python -m pytest tests/contracts -q` -> `60 passed in 0.25s`.
 S03 CONTRACT VALIDATION: `python -m pytest tests/contracts -q` -> `61 passed in 0.14s`.
-AG-M-002 VALIDATION: `python -m pytest -q` -> `73 passed in 0.24s`.
+AG-M-002 S01 VALIDATION: `python -m pytest -q` -> `73 passed`.
+AG-M-002 S02 VALIDATION: `python -m pytest -q` -> `85 passed in 0.28s`.
 APPLICATION TESTS: Not available; application implementation has not started.
 ```
 
