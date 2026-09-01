@@ -73,12 +73,36 @@
     "triggered_overrides": []
   },
   "policy": {
-    "recommendations": ["RESTRICT_ACCESS", "ENCRYPT", "ALERT", "HUMAN_REVIEW"],
+    "recommendations": [
+      {
+        "action": "RESTRICT_ACCESS",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": true,
+        "reason": "Customer-linked meter data requires authorized access only."
+      },
+      {
+        "action": "ENCRYPT",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "The storage context needs an additional protection control."
+      },
+      {
+        "action": "ALERT",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "The partial extraction requires security-team visibility."
+      },
+      {
+        "action": "HUMAN_REVIEW",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "An important synthetic table could not be extracted."
+      }
+    ],
     "human_review_required": true,
     "review_reasons": [
       "Important partial extraction requires review of the unread synthetic table."
     ],
-    "triggered_rule_ids": ["PRIVACY-02"],
-    "execution_mode": "RECOMMENDED"
+    "triggered_rule_ids": ["PRIVACY-02"]
   }
 }

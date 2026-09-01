@@ -64,10 +64,22 @@
     "triggered_overrides": []
   },
   "policy": {
-    "recommendations": ["ALLOW", "LOG"],
+    "recommendations": [
+      {
+        "action": "ALLOW",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": true,
+        "reason": "The synthetic public notice is suitable for public distribution."
+      },
+      {
+        "action": "LOG",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "Record the advisory decision for audit visibility."
+      }
+    ],
     "human_review_required": false,
     "review_reasons": [],
-    "triggered_rule_ids": ["PUBLIC-01"],
-    "execution_mode": "RECOMMENDED"
+    "triggered_rule_ids": ["PUBLIC-01"]
   }
 }

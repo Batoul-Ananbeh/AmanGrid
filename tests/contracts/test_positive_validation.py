@@ -50,10 +50,18 @@ def test_supported_extraction_statuses_validate(extracted_validator, valid_extra
 def test_matching_pdf_and_word_mime_types_validate(extracted_validator, valid_extracted):
     pdf = copy.deepcopy(valid_extracted)
     pdf["input_kind"] = "pdf"
-    pdf["file_metadata"] = {"mime_type": "application/pdf"}
+    pdf["file_metadata"] = {
+        "file_name": "synthetic.pdf",
+        "mime_type": "application/pdf",
+        "file_size_bytes": 4096,
+    }
     extracted_validator.validate(pdf)
 
     word = copy.deepcopy(valid_extracted)
     word["input_kind"] = "word"
-    word["file_metadata"] = {"mime_type": "application/msword"}
+    word["file_metadata"] = {
+        "file_name": "synthetic.doc",
+        "mime_type": "application/msword",
+        "file_size_bytes": 4096,
+    }
     extracted_validator.validate(word)

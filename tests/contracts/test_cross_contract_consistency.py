@@ -28,6 +28,10 @@ def assert_decision_semantics(decision: dict) -> None:
     )
     factor_ids = [factor["factor_id"] for factor in risk["factors"]]
     assert len(factor_ids) == len(set(factor_ids)), "Risk factor IDs must be unique"
+    recommendations = decision["policy"]["recommendations"]
+    assert sum(item["is_primary"] for item in recommendations) == 1, (
+        "Exactly one recommendation must be primary"
+    )
 
 
 def assert_pair_consistent(extracted: dict, decision: dict) -> None:

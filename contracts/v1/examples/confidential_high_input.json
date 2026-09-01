@@ -5,7 +5,8 @@
   "text": "Synthetic customer-support sample: account holder [PERSON-MASKED] is linked to meter [METER-****-2041]. Billing adjustment notes are incomplete.",
   "file_metadata": {
     "file_name": "synthetic_meter_support_sample.docx",
-    "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "file_size_bytes": 8192
   },
   "security_context": {
     "storage_location": "unapproved_repository",

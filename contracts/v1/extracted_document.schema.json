@@ -27,6 +27,7 @@
     "text": {
       "type": "string",
       "minLength": 1,
+      "maxLength": 200000,
       "pattern": "\\S"
     },
     "file_metadata": {
@@ -54,16 +55,15 @@
     {
       "if": {
         "properties": {
-          "input_kind": {"const": "pdf"},
-          "file_metadata": {
-            "required": ["mime_type"]
-          }
+          "input_kind": {"const": "pdf"}
         },
-        "required": ["input_kind", "file_metadata"]
+        "required": ["input_kind"]
       },
       "then": {
+        "required": ["file_metadata"],
         "properties": {
           "file_metadata": {
+            "required": ["file_name", "mime_type", "file_size_bytes"],
             "properties": {
               "mime_type": {"const": "application/pdf"}
             }
@@ -74,16 +74,15 @@
     {
       "if": {
         "properties": {
-          "input_kind": {"const": "word"},
-          "file_metadata": {
-            "required": ["mime_type"]
-          }
+          "input_kind": {"const": "word"}
         },
-        "required": ["input_kind", "file_metadata"]
+        "required": ["input_kind"]
       },
       "then": {
+        "required": ["file_metadata"],
         "properties": {
           "file_metadata": {
+            "required": ["file_name", "mime_type", "file_size_bytes"],
             "properties": {
               "mime_type": {
                 "enum": [
@@ -206,7 +205,8 @@
         },
         "file_size_bytes": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "maximum": 20971520
         },
         "page_count": {
           "type": "integer",

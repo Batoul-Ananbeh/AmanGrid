@@ -259,8 +259,7 @@
         "recommendations",
         "human_review_required",
         "review_reasons",
-        "triggered_rule_ids",
-        "execution_mode"
+        "triggered_rule_ids"
       ],
       "properties": {
         "recommendations": {
@@ -269,19 +268,14 @@
           "maxItems": 10,
           "uniqueItems": true,
           "items": {
-            "enum": [
-              "ALLOW",
-              "LOG",
-              "WARN",
-              "REQUIRE_JUSTIFICATION",
-              "RESTRICT_ACCESS",
-              "BLOCK",
-              "ENCRYPT",
-              "QUARANTINE",
-              "ALERT",
-              "HUMAN_REVIEW"
-            ]
-          }
+            "$ref": "#/$defs/recommendation"
+          },
+          "contains": {
+            "properties": {"is_primary": {"const": true}},
+            "required": ["is_primary"]
+          },
+          "minContains": 1,
+          "maxContains": 1
         },
         "human_review_required": {
           "type": "boolean"
@@ -306,9 +300,6 @@
             "maxLength": 64,
             "pattern": "^[A-Z][A-Z0-9_-]*$"
           }
-        },
-        "execution_mode": {
-          "enum": ["RECOMMENDED", "SIMULATED"]
         }
       },
       "allOf": [
@@ -323,8 +314,12 @@
             "properties": {
               "review_reasons": {"minItems": 1},
               "recommendations": {
-                "contains": {"const": "HUMAN_REVIEW"},
-                "minContains": 1
+                "contains": {
+                  "properties": {"action": {"const": "HUMAN_REVIEW"}},
+                  "required": ["action"]
+                },
+                "minContains": 1,
+                "maxContains": 1
               }
             }
           },
@@ -333,7 +328,10 @@
               "review_reasons": {"maxItems": 0},
               "recommendations": {
                 "not": {
-                  "contains": {"const": "HUMAN_REVIEW"}
+                  "contains": {
+                    "properties": {"action": {"const": "HUMAN_REVIEW"}},
+                    "required": ["action"]
+                  }
                 }
               }
             }
@@ -343,7 +341,10 @@
           "if": {
             "properties": {
               "recommendations": {
-                "contains": {"const": "ALLOW"},
+                "contains": {
+                  "properties": {"action": {"const": "ALLOW"}},
+                  "required": ["action"]
+                },
                 "minContains": 1
               }
             },
@@ -352,12 +353,48 @@
           "then": {
             "properties": {
               "recommendations": {
-                "items": {"enum": ["ALLOW", "LOG"]}
+                "items": {
+                  "properties": {
+                    "action": {"enum": ["ALLOW", "LOG"]}
+                  }
+                }
               }
             }
           }
         }
       ]
+    },
+    "recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "execution_mode", "is_primary", "reason"],
+      "properties": {
+        "action": {
+          "enum": [
+            "ALLOW",
+            "LOG",
+            "WARN",
+            "REQUIRE_JUSTIFICATION",
+            "RESTRICT_ACCESS",
+            "BLOCK",
+            "ENCRYPT",
+            "QUARANTINE",
+            "ALERT",
+            "HUMAN_REVIEW"
+          ]
+        },
+        "execution_mode": {
+          "enum": ["RECOMMENDED", "SIMULATED"]
+        },
+        "is_primary": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        }
+      }
     }
   },
   "allOf": [

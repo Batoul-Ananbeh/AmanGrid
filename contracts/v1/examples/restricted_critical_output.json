@@ -82,12 +82,42 @@
     "triggered_overrides": ["DRAFT-SCADA-CREDENTIAL", "DRAFT-RESTRICTED-EXTERNAL"]
   },
   "policy": {
-    "recommendations": ["QUARANTINE", "ENCRYPT", "RESTRICT_ACCESS", "ALERT", "HUMAN_REVIEW"],
+    "recommendations": [
+      {
+        "action": "QUARANTINE",
+        "execution_mode": "SIMULATED",
+        "is_primary": true,
+        "reason": "Critical restricted OT data is in an unapproved external-sharing context."
+      },
+      {
+        "action": "ENCRYPT",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "The supplied context reports that the document is not encrypted."
+      },
+      {
+        "action": "RESTRICT_ACCESS",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "Access must be restricted to the authorized OT security group."
+      },
+      {
+        "action": "ALERT",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "The critical synthetic finding requires security-team visibility."
+      },
+      {
+        "action": "HUMAN_REVIEW",
+        "execution_mode": "RECOMMENDED",
+        "is_primary": false,
+        "reason": "Critical restricted OT context requires an authorized human decision."
+      }
+    ],
     "human_review_required": true,
     "review_reasons": [
       "Critical restricted OT context requires an authorized human decision."
     ],
-    "triggered_rule_ids": ["ENERGY-OT-04"],
-    "execution_mode": "SIMULATED"
+    "triggered_rule_ids": ["ENERGY-OT-04"]
   }
 }
