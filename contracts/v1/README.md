@@ -33,7 +33,7 @@ Evidence items require `masked: true`, and every excerpt is limited to 160 chara
 
 `risk.factors` is a generic frontend-oriented list of stable IDs, labels, severities, and explanations. The three fixtures use the six current AmanGrid factors: Data Sensitivity, Operational Impact, Exposure Level, Access Scope, Storage Compliance, and Protection Gap. Fixture scores are illustrative contract data only; these schemas do not implement weights, numeric contributions, normalization, overrides, or the final scoring engine.
 
-The schema enforces the approved `final_score` to risk-level bands: 0-24 Low, 25-49 Medium, 50-74 High, and 75-100 Critical. Test-layer semantic validation additionally rejects a final score below its base score and duplicate `risk.factors[].factor_id` values; these are payload relationships intentionally kept outside the scoring implementation owned by AG-M-004.
+The schema enforces the approved `final_score` to risk-level bands: 0-24 Low, 25-49 Medium, 50-74 High, and 75-100 Critical. Test-layer semantic validation additionally rejects a final score below its base score, duplicate `risk.factors[].factor_id` values, and duplicate `policy.recommendations[].action` values; these are payload relationships intentionally kept outside the scoring implementation owned by AG-M-004.
 
 ## Policy and human review
 

@@ -7,11 +7,11 @@
 ```text
 DATE: 2026-09-01
 PROJECT: AmanGrid
-LOCAL PATH: C:\Projects\AmanGrid
+LOCAL PATH: D:\Projects\AmanGrid
 REMOTE: Batoul-Ananbeh/AmanGrid
-CURRENT TASK: AG-M-001 S02 - Contract Review Fixes
+CURRENT TASK: AG-M-001 S03 - Final Review Fixes
 CURRENT BRANCH: feature/ag-m-001-analysis-contracts
-BASE HEAD: 190eb9d - feat(contracts): add draft v1 analysis contracts and fixtures
+LAST PUSHED HEAD (S02): 92fd9e8 - feat(contracts): address application review feedback
 MODE: IMPLEMENT / CONTRACT REVIEW FIXES
 ```
 
@@ -95,25 +95,24 @@ S01 planning outputs:
 - mock result matching the draft contract;
 - initial test commands.
 
-## AG-M-001 S02 Review Fixes
+## AG-M-001 S03 Final Review Fixes
 
-Batoul's Application Stack review requested six bounded changes before approval:
+The S02 changes addressed the main Application Stack concerns. PR [#2](https://github.com/Batoul-Ananbeh/AmanGrid/pull/2) (`feat(contracts): draft v1 analysis contracts and fixtures`) is currently open as a Draft; it must not be merged or frozen yet.
 
-1. Require core `file_metadata` for PDF and Word inputs.
-2. Bound file size to 20 MiB and extracted text to 200,000 characters.
-3. Represent recommendations as objects with exactly one explicit primary action.
-4. Keep review workflow state Application-owned.
-5. Document safe API behavior for unsupported versions and schema failures.
-6. Attach the exact validation command and output to the PR.
+Before final approval, Batoul requested these bounded S03 changes:
 
-PR #2 was closed without merge; the branch and commits remain available. After S02 validation, reopen it as Draft for a second Application Stack review. Do not merge or Contract Freeze until Batoul approves the updated draft.
+1. Update the PR description with the exact S02 validation command and `60 passed` result.
+2. Update this handoff with the current path, HEAD, Draft PR state, validation result, and review state.
+3. Add semantic validation and a negative test that reject duplicate `policy.recommendations[].action` values.
+
+Do not merge or declare Contract Freeze until Batoul completes the final review and explicitly approves the draft.
 
 ## Immediate Next Steps
 
-1. Validate and commit AG-M-001 S02 changes on `feature/ag-m-001-analysis-contracts`.
-2. Reopen PR #2 as Draft and attach validation evidence.
-3. Request Batoul's second review; do not freeze or merge without her approval.
-4. Keep AG-B-001 at S01 until the updated contract is accepted.
+1. Commit and push the AG-M-001 S03 duplicate-action semantic validation fix.
+2. Update PR #2 description with the exact S02 validation evidence: `python -m pytest tests/contracts -q` -> `60 passed`.
+3. Request Batoul's final review; keep PR #2 as a Draft and do not freeze or merge.
+4. Keep AG-B-001 at S01 until Batoul approves the updated draft.
 
 ## Open Decisions
 
@@ -125,7 +124,8 @@ PR #2 was closed without merge; the branch and commits remain available. After S
 ## Last Known Validation
 
 ```text
-BASELINE CONTRACT VALIDATION: `python -m pytest tests/contracts -q` -> `52 passed in 0.13s` before S02 changes.
+S02 CONTRACT VALIDATION: `python -m pytest tests/contracts -q` -> `60 passed in 0.25s`.
+S03 CONTRACT VALIDATION: `python -m pytest tests/contracts -q` -> `61 passed in 0.14s`.
 APPLICATION TESTS: Not available; application implementation has not started.
 ```
 

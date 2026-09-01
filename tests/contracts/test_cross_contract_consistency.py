@@ -32,6 +32,10 @@ def assert_decision_semantics(decision: dict) -> None:
     assert sum(item["is_primary"] for item in recommendations) == 1, (
         "Exactly one recommendation must be primary"
     )
+    recommendation_actions = [item["action"] for item in recommendations]
+    assert len(recommendation_actions) == len(set(recommendation_actions)), (
+        "Recommendation actions must be unique"
+    )
 
 
 def assert_pair_consistent(extracted: dict, decision: dict) -> None:
@@ -106,6 +110,14 @@ def test_test_layer_semantics_reject_duplicate_factor_ids(fixture_pairs):
     decision = copy.deepcopy(fixture_pairs[0][1])
     decision["risk"]["factors"][1]["factor_id"] = "data_sensitivity"
     with pytest.raises(AssertionError, match="must be unique"):
+        assert_decision_semantics(decision)
+
+
+def test_test_layer_semantics_reject_duplicate_recommendation_actions(fixture_pairs):
+    decision = copy.deepcopy(fixture_pairs[1][1])
+    decision["policy"]["recommendations"][1]["action"] = decision["policy"]["recommendations"][0]["action"]
+    decision["policy"]["recommendations"][1]["reason"] = "Different synthetic rationale."
+    with pytest.raises(AssertionError, match="Recommendation actions must be unique"):
         assert_decision_semantics(decision)
 
 
