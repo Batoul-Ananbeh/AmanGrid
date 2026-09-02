@@ -1,4 +1,4 @@
-# AmanGrid - Current Handoff
+﻿# AmanGrid - Current Handoff
 
 > Concise operational state for new sessions. Update this file when the branch, HEAD, completed task, validation evidence, blockers, or next task changes.
 
@@ -9,9 +9,9 @@ DATE: 2026-09-01
 PROJECT: AmanGrid
 LOCAL PATH: D:\Projects\AmanGrid
 REMOTE: Batoul-Ananbeh/AmanGrid
-CURRENT TASK: AG-M-002 - Sensitive Data Detection
-CURRENT BRANCH: feature/ag-m-002-sensitive-data-detection
-BASE HEAD: 6a9e0f7 - Merge pull request #2 from Batoul-Ananbeh/feature/ag-m-001-analysis-contracts
+CURRENT TASK: AG-M-003 - Classification Engine
+CURRENT BRANCH: feature/ag-m-003-classification-engine
+BASE HEAD: 8b68058 - Merge pull request #3 from Batoul-Ananbeh/feature/ag-m-002-sensitive-data-detection
 MODE: IMPLEMENT
 ```
 
@@ -61,12 +61,12 @@ JSON Contracts connect both tracks. Integration and End-to-End testing are share
 ### Mo'men
 
 ```text
-TASK: AG-M-002 - Sensitive Data Detection
-BRANCH: feature/ag-m-002-sensitive-data-detection
+TASK: AG-M-003 - Classification Engine
+BRANCH: feature/ag-m-003-classification-engine
 REVIEWER: Batoul
 ```
 
-In progress: deterministic, synthetic-only sensitive-data and energy/SCADA/OT detection with masked evidence.
+In progress: deterministic, conservative classification with the four approved levels, priority handling, confidence, safe evidence, and uncertainty reasons.
 
 ### Batoul
 
@@ -96,25 +96,15 @@ Completed S03 changes:
 
 No contract change is in scope for AG-M-002.
 
-## AG-M-002 S02 Review Fixes
+## AG-M-002 Completion State
 
-Batoul reviewed the detector draft and requested bounded changes before approval. The local S02 changes:
-
-1. Require an explicit identifier label (`ID`, `Number`, or `No`) or an approved value prefix (`MTR-`, `CUST-`, or `EQ-`).
-2. Reject ordinary prose such as `meter reading`, `customer service`, and `equipment status` as identifiers.
-3. Add positive coverage for every supported label/prefix form and negative ordinary-prose coverage.
-4. Enforce the merged 200,000-character text limit at the public detector entry point.
-5. Document the future masked-evidence adapter while preserving `contract_findings()` as `{type, count}` only.
-
-PR review remains Draft. Do not merge until Batoul completes the final review.
-
+PR #3 was merged into `main` at `8b68058`. The merged detector provides bounded, deterministic sensitive-data and energy/SCADA/OT findings with masked evidence.
 ## Immediate Next Steps
 
-1. Commit and push AG-M-002 S02 review fixes on its existing task branch.
-2. Update the Draft PR with the `85 passed` validation evidence and request Batoul's final review.
-3. Batoul may begin AG-B-001 S02 from `main` using the merged contract fixtures.
-4. Integrate the detector with the Application API only at a shared integration checkpoint.
-
+1. Review AG-M-003 changes and validation evidence.
+2. Commit and push the AG-M-003 branch.
+3. Open a Draft PR and request Batoul review.
+4. Start ECC integration as a separate project-wide task only after AG-M-003 is merged.
 ## Open Decisions
 
 - Confirm whether the 31 August 2026 competition deadline is still binding.
@@ -129,6 +119,7 @@ S02 CONTRACT VALIDATION: `python -m pytest tests/contracts -q` -> `60 passed in 
 S03 CONTRACT VALIDATION: `python -m pytest tests/contracts -q` -> `61 passed in 0.14s`.
 AG-M-002 S01 VALIDATION: `python -m pytest -q` -> `73 passed`.
 AG-M-002 S02 VALIDATION: `python -m pytest -q` -> `85 passed in 0.28s`.
+AG-M-003 VALIDATION: `python -m pytest -q` -> `95 passed, 1 known pytest-cache permission warning`.
 APPLICATION TESTS: Not available; application implementation has not started.
 ```
 
