@@ -59,21 +59,81 @@ The current MVP is intentionally out of scope for:
 
 ## Current repository status
 
-Project baseline only; implementation has not started.
+Implementation is in progress. The repository currently contains:
 
-This repository currently contains the project baseline and documentation references; no application implementation, runtime stack, or production code has been created yet.
+- draft v1 JSON contracts and synthetic fixture pairs;
+- deterministic sensitive-data detection and classification modules;
+- a FastAPI application skeleton with health and contract-validated demo paths;
+- a responsive Arabic React/Vite application interface that verifies API connectivity and renders the contract-validated demo decision;
+- PostgreSQL and full-stack local orchestration configuration;
+- contract, intelligence, backend, and frontend tests.
 
-## Planned stack (planned and not implemented)
+Secure extraction, the real analysis lifecycle, persistence/migrations, authentication, and the complete analyst experience remain planned work. DLP actions remain recommendations or simulations only.
 
-The following stack is planned for future implementation and is explicitly not implemented in the current repository:
+## Implemented stack baseline
 
-- React/Vite
-- Python/FastAPI
-- PostgreSQL
-- Alembic
-- Pytest
-- Vitest
-- Docker Compose
+| Area | Baseline |
+| --- | --- |
+| Frontend | React 19, TypeScript 7, Vite 8, Vitest 5 |
+| Backend | Python 3.12, FastAPI 0.141, Uvicorn |
+| Contract validation | JSON Schema Draft 2020-12 with `jsonschema` |
+| Database service | PostgreSQL 18; schema and application wiring are deferred |
+| Local orchestration | Docker Compose |
+| Tests | Pytest and Vitest |
+
+## Local development
+
+Prerequisites are Python 3.12 and Node.js 24. Docker with Compose is optional unless the PostgreSQL service or the containerized full stack is needed. On Windows, Docker Desktop must have a working WSL 2 backend.
+
+### Backend
+
+From the repository root on Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements-dev.txt
+.\.venv\Scripts\python.exe -m uvicorn backend.app.main:app --reload
+```
+
+The API is available at `http://localhost:8000`:
+
+- `GET /api/v1/health` provides the smoke/health response.
+- `GET /api/v1/demo/analysis` provides the synthetic Restricted/Critical fixture after validating it against `AnalysisDecision` v1.
+- `/api/docs` provides local interactive API documentation.
+
+### Frontend
+
+In a second terminal:
+
+```powershell
+Set-Location frontend
+npm ci
+npm run dev
+```
+
+The frontend is available at `http://localhost:5173` and reads `VITE_API_BASE_URL`, defaulting to `http://localhost:8000`.
+
+### Full stack with Docker Compose
+
+Docker is optional for the direct backend/frontend workflow. To start the frontend, backend, and PostgreSQL together:
+
+```powershell
+Copy-Item .env.example .env
+# Replace POSTGRES_PASSWORD in .env with a local-only password.
+docker compose up --build
+```
+
+No database schema or migration is created by this task; that belongs to the later database/history task.
+
+## Validation commands
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+Set-Location frontend
+npm run typecheck
+npm test
+npm run build
+```
 
 ## Working rules
 
