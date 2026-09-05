@@ -1,18 +1,18 @@
-﻿# AmanGrid - Current Handoff
+# AmanGrid - Current Handoff
 
 > Concise operational state for new sessions. Update this file when the branch, HEAD, completed task, validation evidence, blockers, or next task changes.
 
 ## Snapshot
 
 ```text
-DATE: 2026-09-01
+DATE: 2026-09-05
 PROJECT: AmanGrid
-LOCAL PATH: D:\Projects\AmanGrid
+LOCAL PATH: C:\Projects\AmanGrid
 REMOTE: Batoul-Ananbeh/AmanGrid
-CURRENT TASK: AG-M-003 - Classification Engine
-CURRENT BRANCH: feature/ag-m-003-classification-engine
-BASE HEAD: 8b68058 - Merge pull request #3 from Batoul-Ananbeh/feature/ag-m-002-sensitive-data-detection
-MODE: IMPLEMENT
+CURRENT TASK: AG-M-004 - Risk Scoring Engine
+CURRENT BRANCH: feature/ag-m-004-risk-scoring-engine
+BASE HEAD: 9f9c7c7 - Merge pull request #4 from Batoul-Ananbeh/feature/ag-m-003-classification-engine
+MODE: REVIEW
 ```
 
 ## Repository State
@@ -126,3 +126,12 @@ APPLICATION TESTS: Not available; application implementation has not started.
 ## New Session Instruction
 
 Read `AGENTS.md`, `README.md`, this file, and current Git state. Then read only the sources relevant to the current Task ID. Do not reload the full Master document or both PDFs for routine task work.
+## AG-M-004 Update — 2026-09-05
+
+- Added deterministic, explainable risk scoring under intelligence/risk/.
+- Risk factors: data sensitivity, operational impact, exposure, access scope, storage compliance, and protection gap.
+- Added two transparent score overrides: DRAFT-SCADA-CREDENTIAL and DRAFT-RESTRICTED-EXTERNAL.
+- Added 6 focused tests; full suite passes: 101 passed.
+- Known non-blocking warning remains: .pytest_cache permission denied.
+- Validation passed: python -m compileall -q intelligence, python -m pytest -q, and git diff --cached --check.
+- Next step: review, commit, push, then open a PR for Batoul's review.
