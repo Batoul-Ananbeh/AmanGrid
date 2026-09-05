@@ -8,11 +8,15 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+.pytest_cache/
+.coverage
+coverage.xml
 
 # Node.js
 node_modules/
 dist/
 build/
+*.tsbuildinfo
 
 # Temporary uploads and extracted files
 uploads/

@@ -17,17 +17,14 @@ MODE: REVIEW
 
 ## Repository State
 
-The project baseline and AG-M-001 contracts are merged into `main` at `6a9e0f7`. The merged Intelligence Stack work provides:
-
-- `.gitignore`
-- a minimal `README.md`
-- `docs/.gitkeep`
+The project baseline and Intelligence Stack tasks AG-M-001 through AG-M-003 are merged into `main` at `9f9c7c7`. The merged work provides:
 
 - draft v1 `ExtractedDocument` and `AnalysisDecision` schemas;
 - Public/Low, Confidential/High, and Restricted/Critical synthetic fixture pairs;
-- contract/schema/negative/cross-contract tests.
+- deterministic sensitive-data detection and classification modules;
+- contract, negative, cross-contract, detection, and classification tests.
 
-No Application Stack implementation exists yet. There is no verified frontend, backend, database, migration, Docker configuration, or CI pipeline. Contract tests are available on `main`.
+The current AG-B-001 working tree adds the first Application Stack implementation: a FastAPI skeleton, a responsive Arabic React/Vite application interface, PostgreSQL/Docker Compose configuration, a contract-validated synthetic demo endpoint, and initial application tests. Database schema/migrations, secure extraction, the real analysis lifecycle, and CI remain unimplemented.
 
 ## Approved Product Boundary
 
@@ -56,19 +53,19 @@ MVP inputs are PDF, Word, and manual text. Classification levels are `Public`, `
 
 JSON Contracts connect both tracks. Integration and End-to-End testing are shared checkpoints with one task owner and one reviewer.
 
-## Current Parallel Tasks
+## Current Track State
 
-### Mo'men
+### Mo'men / Intelligence Stack
 
 ```text
-TASK: AG-M-003 - Classification Engine
-BRANCH: feature/ag-m-003-classification-engine
-REVIEWER: Batoul
+COMPLETED THROUGH: AG-M-003 - Classification Engine
+MERGED HEAD: 9f9c7c7
+NEXT PLANNED: AG-M-004 - Risk Scoring Engine
 ```
 
-In progress: deterministic, conservative classification with the four approved levels, priority handling, confidence, safe evidence, and uncertainty reasons.
+No new Intelligence Stack task is started in this Application Stack session.
 
-### Batoul
+### Batoul / Application Stack
 
 ```text
 TASK: AG-B-001 - Application Skeleton
@@ -76,13 +73,13 @@ BRANCH: feature/ag-b-001-application-skeleton
 REVIEWER: Mo'men
 ```
 
-S01 planning outputs; S02 has not yet been verified in this repository:
+Implementation prepared for delivery on the task branch:
 
-- frontend/backend project skeleton;
-- local run configuration;
-- health or smoke path;
-- mock result matching the draft contract;
-- initial test commands.
+- FastAPI application and `GET /api/v1/health`;
+- `GET /api/v1/demo/analysis`, loaded from and validated against the shared v1 fixture;
+- responsive Arabic/RTL React/Vite application interface with API connectivity, demo analysis results, and the recommendation-only boundary;
+- PostgreSQL plus backend/frontend Docker Compose services;
+- reproducible dependency files, local-run documentation, and initial application tests.
 
 ## AG-M-001 Completion State
 
@@ -99,16 +96,32 @@ No contract change is in scope for AG-M-002.
 ## AG-M-002 Completion State
 
 PR #3 was merged into `main` at `8b68058`. The merged detector provides bounded, deterministic sensitive-data and energy/SCADA/OT findings with masked evidence.
+
+## AG-M-003 Completion State
+
+PR #4 was merged into `main` at `9f9c7c7`. The merged classifier provides deterministic conservative classification across the four approved levels, bounded confidence, safe contract fields, and uncertainty handling.
+
+## AG-B-001 Implementation State
+
+The local task branch was fast-forwarded to `origin/main` at `9f9c7c7` before implementation. The AG-B-001 delivery preserves the shared contracts and Intelligence Stack ownership boundary. The demo API consumes the existing Restricted/Critical synthetic fixture rather than maintaining a duplicate payload.
+
+Docker Desktop 29.7.2 and Compose v5.4.0 are now running. The first full Compose start exposed PostgreSQL 18's new data-directory layout, so `compose.yaml` now mounts the versioned `postgres_data_v18` volume at `/var/lib/postgresql`. A clean default `docker compose up --build -d` then built and started the complete local stack successfully: PostgreSQL and FastAPI reported healthy, the React/Nginx frontend returned HTTP 200, the demo endpoint returned the validated v1 Restricted/Critical fixture, and a database query succeeded.
+
+The default Compose services are intentionally left running for local review. Obsolete test volumes from the failed pre-fix start and the isolated validation project were preserved because deleting persistent Docker data requires explicit approval. They contain synthetic local validation data only.
+
+The frontend was refined during AG-B-001 review into an Arabic institutional application interface. It now uses desktop sidebar navigation, a compact application toolbar, mobile header and bottom navigation, a risk meter, a structured findings table, and an explicit recommendation area. Its original AmanGrid mark, blue/white palette, green service status, and utility-oriented copy are visually compatible with Irbid Electricity's public identity without copying the company logo or presenting AmanGrid as an official Irbid Electricity property. The frontend consumes both the health and contract-validated demo endpoints.
+
 ## Immediate Next Steps
 
-1. Review AG-M-003 changes and validation evidence.
-2. Commit and push the AG-M-003 branch.
-3. Open a Draft PR and request Batoul review.
-4. Start ECC integration as a separate project-wide task only after AG-M-003 is merged.
+1. Review the AG-B-001 branch diff and open a PR requesting Mo'men review.
+2. Optionally remove the obsolete synthetic Docker validation volumes after explicit user approval.
+3. Merge AG-B-001 only after review and validation evidence are accepted.
+4. Start AG-B-002 secure upload/extraction only on a new task branch after AG-B-001 is accepted.
+
 ## Open Decisions
 
 - Confirm whether the 31 August 2026 competition deadline is still binding.
-- Confirm the Application Stack implementation details once AG-B-001 S02 is available.
+- Decide when the draft contracts can be formally frozen after Application Stack consumer review.
 - Define the future integration interface between the detector and the Application API without changing contract v1 unnecessarily.
 - Replace any UI wording that implies real DLP execution.
 
@@ -120,7 +133,22 @@ S03 CONTRACT VALIDATION: `python -m pytest tests/contracts -q` -> `61 passed in 
 AG-M-002 S01 VALIDATION: `python -m pytest -q` -> `73 passed`.
 AG-M-002 S02 VALIDATION: `python -m pytest -q` -> `85 passed in 0.28s`.
 AG-M-003 VALIDATION: `python -m pytest -q` -> `95 passed, 1 known pytest-cache permission warning`.
-APPLICATION TESTS: Not available; application implementation has not started.
+AG-B-001 PYTHON VALIDATION: `.venv\Scripts\python.exe -m pytest -q` -> `98 passed, 1 third-party deprecation warning`.
+AG-B-001 PYTHON DEPENDENCIES: `.venv\Scripts\python.exe -m pip check` -> `No broken requirements found`.
+AG-B-001 API SMOKE: Uvicorn on `127.0.0.1:8765` -> `{"status":"ok","service":"amangrid-api","version":"0.1.0"}`.
+AG-B-001 FRONTEND INSTALL: `npm ci` -> `0 vulnerabilities`.
+AG-B-001 FRONTEND TYPECHECK: `npm run typecheck` -> passed.
+AG-B-001 FRONTEND TESTS: `npm test` -> `2 passed`.
+AG-B-001 FRONTEND BUILD: `npm run build -- --outDir <temporary path>` -> passed.
+AG-B-001 FRONTEND REVIEW REFINEMENT: Arabic/RTL institutional workspace; `npm run typecheck`, `npm test`, and production Vite build all passed; `npm ci` reported `0 vulnerabilities`.
+AG-B-001 FRONTEND DOCKER REFRESH: frontend build context reduced from about 106 MB to 16.54 kB via `frontend/.dockerignore`; rebuilt container returned HTTP 200 with the Arabic document and new workspace bundle.
+AG-B-001 APPLICATION UI REFINEMENT: desktop sidebar and mobile bottom navigation added; all visible platform/AI/prototype wording removed; `npm run typecheck`, `npm test`, and production Vite build passed.
+AG-B-001 APPLICATION DOCKER REFRESH: updated frontend image built with a 42.49 kB context; frontend returned HTTP 200, API health returned status `ok`, and all three Compose services remained running/healthy as applicable.
+AG-B-001 DOCKER BUILD: Docker 29.7.2 and Compose v5.4.0; backend and frontend images built successfully; frontend `npm ci` reported `0 vulnerabilities`.
+AG-B-001 DOCKER STACK: default `docker compose up --build -d` -> PostgreSQL 18.6 healthy, FastAPI healthy, and frontend/Nginx up.
+AG-B-001 DOCKER API: `/api/v1/health` -> HTTP 200/status `ok`; `/api/v1/demo/analysis` -> contract `1.0`, classification `Restricted`, risk `Critical`, and `human_review_required: true`.
+AG-B-001 DOCKER FRONTEND: `http://localhost:5173` -> HTTP 200 with the AmanGrid application root.
+AG-B-001 DOCKER DATABASE: `pg_isready` accepted connections; SQL identity query -> `amangrid:amangrid`.
 ```
 
 ## New Session Instruction
