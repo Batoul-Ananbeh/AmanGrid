@@ -1,6 +1,7 @@
 from intelligence.classification import classify_document
 from intelligence.detection import detect_sensitive_data
 from intelligence.risk import RiskLevel, RiskSeverity, assess_risk
+from intelligence.risk.engine import FACTOR_MAXIMUMS, _risk_level_for
 
 
 def document(
@@ -28,21 +29,42 @@ def assess(
     *,
     security_context: dict[str, object] | None = None,
 ):
-    extracted_document = document(
-        text,
-        security_context=security_context,
-    )
+    extracted_document = document(text, security_context=security_context)
     detection = detect_sensitive_data(text)
     classification = classify_document(extracted_document, detection)
+    return assess_risk(extracted_document, classification, detection)
 
-    return assess_risk(
-        extracted_document,
-        classification,
-        detection,
+
+def test_factor_maximums_match_the_approved_normalization() -> None:
+    assert FACTOR_MAXIMUMS == {
+        "data_sensitivity": 30,
+        "operational_impact": 20,
+        "exposure_level": 20,
+        "access_scope": 15,
+        "storage_compliance": 10,
+        "protection_gap": 5,
+    }
+    assert sum(FACTOR_MAXIMUMS.values()) == 100
+
+
+def test_all_factor_maxima_reach_the_total_score_budget() -> None:
+    result = assess(
+        "SCADA PLC maintenance uses internal host 10.1.2.3 "
+        "and password=DemoSecret-77.",
+        security_context={
+            "storage_location": "personal_cloud",
+            "encryption_status": "not_encrypted",
+            "sharing_scope": "external",
+            "users_with_access": 30,
+        },
     )
 
+    assert result.base_score == 100
+    assert result.final_score == 100
+    assert result.level is RiskLevel.CRITICAL
 
-def test_restricted_ot_external_context_matches_reference_score() -> None:
+
+def test_restricted_ot_external_context_uses_stable_multiple_overrides() -> None:
     result = assess(
         "SCADA PLC maintenance uses internal host 10.1.2.3 "
         "and password=DemoSecret-77.",
@@ -54,14 +76,34 @@ def test_restricted_ot_external_context_matches_reference_score() -> None:
         },
     )
 
-    assert result.base_score == 88
-    assert result.final_score == 92
+    assert result.base_score == 97
+    assert result.final_score == 97
     assert result.level is RiskLevel.CRITICAL
     assert result.triggered_overrides == (
+        "DRAFT-CREDENTIAL-UNENCRYPTED",
         "DRAFT-SCADA-CREDENTIAL",
         "DRAFT-RESTRICTED-EXTERNAL",
     )
     assert len(result.factors) == 6
+
+
+def test_credentials_and_unencrypted_has_a_high_risk_floor() -> None:
+    result = assess(
+        "Temporary password=DemoSecret-77 for maintenance access.",
+        security_context={
+            "storage_location": "approved_repository",
+            "encryption_status": "not_encrypted",
+            "sharing_scope": "private",
+            "users_with_access": 1,
+        },
+    )
+
+    assert result.final_score >= 50
+    assert result.level in (RiskLevel.HIGH, RiskLevel.CRITICAL)
+    assert result.level is RiskLevel.HIGH
+    assert result.triggered_overrides == (
+        "DRAFT-CREDENTIAL-UNENCRYPTED",
+    )
 
 
 def test_public_approved_encrypted_private_document_is_low_risk() -> None:
@@ -75,22 +117,21 @@ def test_public_approved_encrypted_private_document_is_low_risk() -> None:
         },
     )
 
-    assert result.base_score == 4
-    assert result.final_score == 4
+    assert result.base_score == 5
+    assert result.final_score == 5
     assert result.level is RiskLevel.LOW
     assert result.triggered_overrides == ()
 
 
 def test_missing_security_context_is_unknown_not_invented() -> None:
     result = assess("Customer ID: CUST-001122")
-
     factors = {factor.factor_id: factor for factor in result.factors}
 
     assert factors["exposure_level"].severity is RiskSeverity.UNKNOWN
     assert factors["access_scope"].severity is RiskSeverity.UNKNOWN
     assert factors["storage_compliance"].severity is RiskSeverity.UNKNOWN
     assert factors["protection_gap"].severity is RiskSeverity.UNKNOWN
-    assert result.base_score == 24
+    assert result.base_score == 25
 
 
 def test_restricted_external_override_is_critical() -> None:
@@ -104,12 +145,21 @@ def test_restricted_external_override_is_critical() -> None:
         },
     )
 
-    assert result.base_score == 63
+    assert result.base_score == 70
     assert result.final_score == 92
     assert result.level is RiskLevel.CRITICAL
     assert result.triggered_overrides == (
         "DRAFT-RESTRICTED-EXTERNAL",
     )
+
+
+def test_risk_level_boundaries_match_the_v1_contract() -> None:
+    assert _risk_level_for(24) is RiskLevel.LOW
+    assert _risk_level_for(25) is RiskLevel.MEDIUM
+    assert _risk_level_for(49) is RiskLevel.MEDIUM
+    assert _risk_level_for(50) is RiskLevel.HIGH
+    assert _risk_level_for(74) is RiskLevel.HIGH
+    assert _risk_level_for(75) is RiskLevel.CRITICAL
 
 
 def test_risk_contract_fields_are_safe_and_schema_shaped() -> None:
@@ -126,8 +176,8 @@ def test_risk_contract_fields_are_safe_and_schema_shaped() -> None:
 
     fields = result.to_contract_fields()
 
-    assert fields["risk"]["base_score"] == 88
-    assert fields["risk"]["final_score"] == 92
+    assert fields["risk"]["base_score"] == 97
+    assert fields["risk"]["final_score"] == 97
     assert fields["risk"]["level"] == "Critical"
     assert len(fields["risk"]["factors"]) == 6
     assert secret not in str(fields)

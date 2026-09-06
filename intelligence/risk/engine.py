@@ -10,11 +10,21 @@ from intelligence.detection import DetectionResult, FindingType
 from .models import RiskFactor, RiskLevel, RiskResult, RiskSeverity
 
 
+# Approved maximum contribution of each factor; together they total 100.
+FACTOR_MAXIMUMS = {
+    "data_sensitivity": 30,
+    "operational_impact": 20,
+    "exposure_level": 20,
+    "access_scope": 15,
+    "storage_compliance": 10,
+    "protection_gap": 5,
+}
+
 CLASSIFICATION_SCORES = {
-    ClassificationLevel.PUBLIC: 4,
-    ClassificationLevel.INTERNAL: 14,
-    ClassificationLevel.CONFIDENTIAL: 24,
-    ClassificationLevel.RESTRICTED: 28,
+    ClassificationLevel.PUBLIC: 5,
+    ClassificationLevel.INTERNAL: 15,
+    ClassificationLevel.CONFIDENTIAL: 25,
+    ClassificationLevel.RESTRICTED: 30,
 }
 
 
@@ -23,12 +33,7 @@ def assess_risk(
     classification: ClassificationResult,
     detection: DetectionResult,
 ) -> RiskResult:
-    """Assess the current handling risk of a classified document.
-
-    The engine uses only structured classification, detection, and supplied
-    security context. Missing context is represented as ``unknown`` and is
-    never treated as a confirmed security condition.
-    """
+    """Assess the current handling risk of a classified document."""
 
     security_context = _security_context(document)
     finding_types = {finding.type for finding in detection.findings}
@@ -94,14 +99,13 @@ def _security_context(document: Mapping[str, object]) -> Mapping[str, object]:
 def _data_sensitivity_factor(
     level: ClassificationLevel,
 ) -> tuple[int, RiskFactor]:
-    score = CLASSIFICATION_SCORES[level]
-
     severity_by_level = {
         ClassificationLevel.PUBLIC: RiskSeverity.LOW,
         ClassificationLevel.INTERNAL: RiskSeverity.MEDIUM,
         ClassificationLevel.CONFIDENTIAL: RiskSeverity.HIGH,
         ClassificationLevel.RESTRICTED: RiskSeverity.CRITICAL,
     }
+    score = CLASSIFICATION_SCORES[level]
 
     return score, RiskFactor(
         factor_id="data_sensitivity",
@@ -172,31 +176,11 @@ def _operational_impact_factor(
 
 def _exposure_level_factor(value: object) -> tuple[int, RiskFactor]:
     mapping = {
-        "private": (
-            0,
-            RiskSeverity.NONE,
-            "The supplied context indicates private sharing only.",
-        ),
-        "restricted_group": (
-            3,
-            RiskSeverity.LOW,
-            "The supplied context limits sharing to a restricted group.",
-        ),
-        "department_wide": (
-            7,
-            RiskSeverity.MEDIUM,
-            "The supplied context allows sharing across a department.",
-        ),
-        "organization_wide": (
-            10,
-            RiskSeverity.HIGH,
-            "The supplied context allows organization-wide sharing.",
-        ),
-        "external": (
-            15,
-            RiskSeverity.CRITICAL,
-            "The supplied context indicates external sharing.",
-        ),
+        "private": (0, RiskSeverity.NONE, "The supplied context indicates private sharing only."),
+        "restricted_group": (4, RiskSeverity.LOW, "The supplied context limits sharing to a restricted group."),
+        "department_wide": (10, RiskSeverity.MEDIUM, "The supplied context allows sharing across a department."),
+        "organization_wide": (15, RiskSeverity.HIGH, "The supplied context allows organization-wide sharing."),
+        "external": (20, RiskSeverity.CRITICAL, "The supplied context indicates external sharing."),
     }
 
     if value not in mapping:
@@ -228,13 +212,13 @@ def _access_scope_factor(value: object) -> tuple[int, RiskFactor]:
     if value <= 2:
         score, severity = 0, RiskSeverity.NONE
     elif value <= 5:
-        score, severity = 2, RiskSeverity.LOW
+        score, severity = 3, RiskSeverity.LOW
     elif value <= 10:
-        score, severity = 5, RiskSeverity.MEDIUM
+        score, severity = 8, RiskSeverity.MEDIUM
     elif value <= 25:
-        score, severity = 8, RiskSeverity.HIGH
+        score, severity = 12, RiskSeverity.HIGH
     else:
-        score, severity = 10, RiskSeverity.CRITICAL
+        score, severity = 15, RiskSeverity.CRITICAL
 
     return score, RiskFactor(
         factor_id="access_scope",
@@ -246,26 +230,13 @@ def _access_scope_factor(value: object) -> tuple[int, RiskFactor]:
 
 def _storage_compliance_factor(value: object) -> tuple[int, RiskFactor]:
     mapping = {
-        "approved_repository": (
-            0,
-            RiskSeverity.NONE,
-            "The supplied context identifies an approved repository.",
-        ),
-        "local_device": (
-            5,
-            RiskSeverity.MEDIUM,
-            "The supplied context identifies local-device storage.",
-        ),
-        "unapproved_repository": (
-            8,
-            RiskSeverity.HIGH,
-            "The supplied context identifies an unapproved repository.",
-        ),
+        "approved_repository": (0, RiskSeverity.NONE, "The supplied context identifies an approved repository."),
+        "local_device": (5, RiskSeverity.MEDIUM, "The supplied context identifies local-device storage."),
+        "unapproved_repository": (8, RiskSeverity.HIGH, "The supplied context identifies an unapproved repository."),
         "personal_cloud": (
             10,
             RiskSeverity.CRITICAL,
-            "Personal cloud storage is not an approved repository for "
-            "sensitive energy data.",
+            "Personal cloud storage is not an approved repository for sensitive energy data.",
         ),
     }
 
@@ -296,13 +267,11 @@ def _protection_gap_factor(value: object) -> tuple[int, RiskFactor]:
         )
 
     if value == "not_encrypted":
-        return 7, RiskFactor(
+        return 5, RiskFactor(
             factor_id="protection_gap",
             label="Protection Gap",
             severity=RiskSeverity.CRITICAL,
-            explanation=(
-                "The supplied context reports that the document is not encrypted."
-            ),
+            explanation="The supplied context reports that the document is not encrypted.",
         )
 
     return 0, RiskFactor(
@@ -319,13 +288,18 @@ def _apply_overrides(
     finding_types: set[FindingType],
     security_context: Mapping[str, object],
 ) -> tuple[int, tuple[str, ...]]:
+    """Apply independent override floors in stable evaluation order."""
+
     final_score = base_score
     triggered: list[str] = []
+    has_credential = FindingType.CREDENTIAL in finding_types
+    is_unencrypted = security_context.get("encryption_status") == "not_encrypted"
 
-    if (
-        classification.scada_ot_relevant
-        and FindingType.CREDENTIAL in finding_types
-    ):
+    if has_credential and is_unencrypted:
+        triggered.append("DRAFT-CREDENTIAL-UNENCRYPTED")
+        final_score = max(final_score, 50)
+
+    if classification.scada_ot_relevant and has_credential:
         triggered.append("DRAFT-SCADA-CREDENTIAL")
         final_score = max(final_score, 88)
 
